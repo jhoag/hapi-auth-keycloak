@@ -18,6 +18,7 @@ const scheme = joi.object({
   secret: joi.string().min(1)
     .description('The related secret of the Keycloak client/application')
     .example('1234-bar-4321-foo'),
+  jwtTokenType: joi.string().description('The type given to JWT tokens').default('Bearer'),
   publicKey: joi.alternatives().try(
     joi.string().regex(/^-----BEGIN RSA PUBLIC KEY-----[\s\S]*-----END RSA PUBLIC KEY-----\s?$/ig, 'PEM'),
     joi.object().type(Buffer),
@@ -94,7 +95,7 @@ function isJwk (key) {
  * @throws {Error} If JWK has an unsupported key type
  * @throws {Error} If options are invalid
  */
-function verify (opts) {
+function verify(opts) {
   if (isJwk(opts.publicKey)) {
     opts.publicKey = jwkToPem(opts.publicKey)
   }
@@ -116,7 +117,7 @@ function verify (opts) {
  * @param {string} [scheme = 'Bearer'] The related scheme
  * @returns {Boom.unauthorized} The created `Boom` error
  */
-function raiseUnauthorized (error, reason, scheme = 'Bearer') {
+function raiseUnauthorized(error, reason, scheme = 'Bearer') {
   return boom.unauthorized(
     error !== errorMessages.missing ? error : null,
     scheme,
@@ -150,7 +151,7 @@ const errorMessages = {
  * @param {Object|Function} h The original toolkit/mock
  * @returns {Object|Function} The decorated toolkit/mock
  */
-function fakeToolkit (h) {
+function fakeToolkit(h) {
   if (!h.authenticated && typeof h === 'function') {
     h.authenticated = h
   }
